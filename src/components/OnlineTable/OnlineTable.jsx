@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+// import connectionWS from '../../actions/connectionWS';
 import Table from '../Table/Table';
 import TableCell from '../Table/TableCell';
 import TableRow from '../Table/TableRow';
@@ -19,6 +20,7 @@ export default function OnlineTable() {
   useEffect(() => {
     dispatch({ type: 'GENERATE_TABLE' });
     setIsGen(true);
+    // connectionWS();
   }, []);
   return (
     <>
@@ -26,15 +28,29 @@ export default function OnlineTable() {
         {isGen &&
           table.map((tableRow) => (
             <TableRow key={tableRow[0].y}>
-              {tableRow.map((tableCell) => (
-                <TableCell
-                  key={`y${tableCell.y}x${tableCell.x}`}
-                  cell={tableCell}
-                  setCell={(payload) => {
-                    dispatch({ type: 'SET_CELL', payload });
-                  }}
-                />
-              ))}
+              {tableRow.map((tableCell) => {
+                if (tableCell.function && tableCell.function() !== tableCell.value) {
+                  // dispatch({ type: 'SET_CELL', payload: { ...tableCell, value: tableCell.function() } });
+                }
+                return (
+                  <TableCell
+                    key={`y${tableCell.y}x${tableCell.x}`}
+                    cell={tableCell}
+                    onFocus={(setValue) => {
+                      // console.log(
+                      //   tableCell.function ? tableCell.tableFunction : tableCell.value,
+                      //   e.target.value,
+                      //   tableCell.tableFunction,
+                      //   tableCell.function,
+                      // );
+                      setValue(tableCell.function ? tableCell.tableFunction : tableCell.value);
+                    }}
+                    setCell={(payload) => {
+                      dispatch({ type: 'SET_CELL', payload });
+                    }}
+                  />
+                );
+              })}
             </TableRow>
           ))}
       </Table>

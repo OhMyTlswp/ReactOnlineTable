@@ -1,4 +1,5 @@
 function processTableFunction(regexpMatch, table, cell) {
+  const tableFunction = regexpMatch[0];
   const type = regexpMatch[1];
   const y1 = +regexpMatch[2];
   const y2 = +regexpMatch[4];
@@ -6,6 +7,7 @@ function processTableFunction(regexpMatch, table, cell) {
   const x2 = +regexpMatch[5];
   const isY = y1 === y2;
   const newCell = cell;
+
   console.log(regexpMatch, table, cell);
   if (y1 === y2 || x1 === x2) {
     switch (type) {
@@ -15,37 +17,45 @@ function processTableFunction(regexpMatch, table, cell) {
           newCell.function = () => {
             let sum = 0;
             for (let index = x1; index <= x2; index += 1) {
-              sum += +table[y1][index].value;
+              sum += +(table[y1][index].function ? table[y1][index].function() : table[y1][index].value);
             }
             return sum;
           };
-          for (let index = x1; index <= x2; index += 1) {
-            newCell.value += +table[y1][index].value;
-          }
+          newCell.value = newCell.function();
         } else {
           newCell.function = () => {
             let sum = 0;
             for (let index = y1; index <= y2; index += 1) {
-              sum += +table[index][x1].value;
+              sum += +(table[index][x1].function ? table[index][x1].function() : table[index][x1].value);
             }
             return sum;
           };
-          for (let index = y1; index <= y2; index += 1) {
-            newCell.value += +table[index][x1].value;
-          }
+          newCell.value = newCell.function();
         }
+        newCell.tableFunction = tableFunction;
         return newCell;
       case 'multiply':
         newCell.value = 1;
         if (isY) {
-          for (let index = x1; index <= x2; index += 1) {
-            newCell.value *= +table[y1][index].value;
-          }
+          newCell.function = () => {
+            let sum = 1;
+            for (let index = x1; index <= x2; index += 1) {
+              sum *= +(table[y1][index].function ? table[y1][index].function() : table[y1][index].value);
+            }
+            return sum;
+          };
+          newCell.value = newCell.function();
         } else {
-          for (let index = y1; index <= y2; index += 1) {
-            newCell.value *= +table[index][x1].value;
-          }
+          newCell.function = () => {
+            let sum = 1;
+            for (let index = y1; index <= y2; index += 1) {
+              sum *= +(table[index][x1].function ? table[index][x1].function() : table[index][x1].value);
+            }
+            return sum;
+          };
+          newCell.value = newCell.function();
         }
+        newCell.tableFunction = tableFunction;
         return newCell;
       default:
         return newCell;
@@ -79,20 +89,22 @@ export default function reducer(state = [], action) {
           if (regexpMatch && regexpMatch.length === 6) {
             newCell = processTableFunction(regexpMatch, table, newCell);
           }
+          // console.log(newCell);
+          // newCell.value = newCell.function();
           table[tableItem.y][tableItem.x] = newCell;
         });
       });
       return { ...state, table };
     case 'SET_CELL':
       table = [...state.table];
-      regexpMatch = action.payload.value.match(/^=([A-Za-z]+)+\(y(\d)x(\d);y(\d)x(\d)\)/);
+      regexpMatch = String(action.payload.value).match(/^=([A-Za-z]+)+\(y(\d)x(\d);y(\d)x(\d)\)/);
       newCell = action.payload;
       newCell.function = null;
       if (regexpMatch && regexpMatch.length === 6) {
         newCell = processTableFunction(regexpMatch, table, newCell);
         console.log(newCell);
       }
-      table[action.payload.y][action.payload.x] = newCell;
+      table[action.payload.y][action.payload.x] = { ...newCell };
       return { ...state, table };
     default:
       return state;
