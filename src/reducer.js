@@ -8,7 +8,6 @@ function processTableFunction(regexpMatch, table, cell) {
   const isY = y1 === y2;
   const newCell = cell;
 
-  console.log(regexpMatch, table, cell);
   if (y1 === y2 || x1 === x2) {
     switch (type) {
       case 'sum':
@@ -69,9 +68,36 @@ export default function reducer(state = [], action) {
   let table = [];
   let regexpMatch = [];
   let newCell = {};
+  let users = [];
   switch (action.type) {
     case 'SET_USER':
-      return { ...state, users: [...state.users, action.payload] };
+      return { ...state, user: action.payload };
+    case 'SET_USER_CURSOR':
+      if (state.user.id === action.payload.id) {
+        return { ...state, user: action.payload };
+      }
+      users = state.users.map((userItem) => (userItem.id === action.payload.id ? action.payload : userItem));
+      return { ...state, users };
+    case 'SET_USERS':
+      if (state.user) {
+        users = action.payload.map((usersItem) => usersItem.id !== state.user.id && usersItem);
+        return { ...state, users: [...users] };
+      }
+      return { ...state, users: action.payload };
+    case 'SET_TABLE':
+      table = [...action.payload];
+      action.payload.forEach((tableRow) => {
+        tableRow.forEach((tableItem) => {
+          regexpMatch = String(tableItem.value).match(/^=([A-Za-z]+)+\(y(\d)x(\d);y(\d)x(\d)\)/);
+          newCell = tableItem;
+          newCell.function = null;
+          if (regexpMatch && regexpMatch.length === 6) {
+            newCell = processTableFunction(regexpMatch, table, newCell);
+          }
+          table[tableItem.y][tableItem.x] = newCell;
+        });
+      });
+      return { ...state, table };
     case 'GENERATE_TABLE':
       for (let indexY = 0; indexY <= 10; indexY += 1) {
         table.push([]);
@@ -79,18 +105,14 @@ export default function reducer(state = [], action) {
           table[indexY].push({ x: indexX, y: indexY, value: '', isSelected: false, user: null });
         }
       }
-      console.log(table);
       state.table.forEach((tableRow) => {
         tableRow.forEach((tableItem) => {
-          // table = [...state.table];
           regexpMatch = String(tableItem.value).match(/^=([A-Za-z]+)+\(y(\d)x(\d);y(\d)x(\d)\)/);
           newCell = tableItem;
           newCell.function = null;
           if (regexpMatch && regexpMatch.length === 6) {
             newCell = processTableFunction(regexpMatch, table, newCell);
           }
-          // console.log(newCell);
-          // newCell.value = newCell.function();
           table[tableItem.y][tableItem.x] = newCell;
         });
       });
@@ -102,7 +124,6 @@ export default function reducer(state = [], action) {
       newCell.function = null;
       if (regexpMatch && regexpMatch.length === 6) {
         newCell = processTableFunction(regexpMatch, table, newCell);
-        console.log(newCell);
       }
       table[action.payload.y][action.payload.x] = { ...newCell };
       return { ...state, table };

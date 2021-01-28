@@ -1,5 +1,6 @@
 const initialState = {
   users: [],
+  user: null,
   table: [
     [
       { x: 0, y: 0, value: 'Название', isSelected: false, user: null },
@@ -11,19 +12,19 @@ const initialState = {
       { x: 0, y: 1, value: 'Банан' },
       { x: 1, y: 1, value: 5 },
       { x: 2, y: 1, value: 20 },
-      { x: 3, y: 1, value: '=sum(y1x1;y1x2)' },
+      { x: 3, y: 1, value: '=multiply(y1x1;y1x2)' },
     ],
     [
       { x: 0, y: 2, value: 'Груша' },
       { x: 1, y: 2, value: 4 },
       { x: 2, y: 2, value: 25 },
-      { x: 3, y: 2, value: '=sum(y2x1;y2x2)' },
+      { x: 3, y: 2, value: '=multiply(y2x1;y2x2)' },
     ],
     [
       { x: 0, y: 3, value: 'Мясо' },
       { x: 1, y: 3, value: 20 },
       { x: 2, y: 3, value: 120 },
-      { x: 3, y: 3, value: '=sum(y3x1;y3x2)' },
+      { x: 3, y: 3, value: '=multiply(y3x1;y3x2)' },
     ],
     [
       { x: 0, y: 4, value: '' },

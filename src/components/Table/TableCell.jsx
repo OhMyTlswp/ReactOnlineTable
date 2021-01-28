@@ -1,17 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import style from './Table.module.scss';
 
-const TableCell = React.memo(({ cell, setCell, onFocus }) => {
+const TableCell = React.memo(({ cell, setCell, onFocus, onMouseEnter, onMouseLeave, cellValue }) => {
   const [isActive, setIsActive] = useState(false);
   const [value, setValue] = useState('');
-  const valueOrFunc = cell.function ? cell.function() : cell.value;
-  useEffect(() => {
-    // setValue(cell.value);
-    if (cell.function) {
-      // setCell({ ...cell, value: cell.function() });
-    }
-  }, [cell.function]);
   return (
     <td
       onDoubleClick={(e) => {
@@ -19,6 +12,8 @@ const TableCell = React.memo(({ cell, setCell, onFocus }) => {
         e.target.disabled = false;
         e.target.focus();
       }}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
       className={style['table__cell']}
     >
       <input
@@ -38,7 +33,7 @@ const TableCell = React.memo(({ cell, setCell, onFocus }) => {
           setCell({ ...cell, value: e.target.value });
         }}
         disabled={!isActive}
-        value={!isActive ? valueOrFunc : value}
+        value={!isActive ? cellValue : value}
       />
     </td>
   );
@@ -47,9 +42,14 @@ const TableCell = React.memo(({ cell, setCell, onFocus }) => {
 export default TableCell;
 TableCell.defaultProps = {
   onFocus: null,
+  onMouseEnter: null,
+  onMouseLeave: null,
 };
 TableCell.propTypes = {
   cell: PropTypes.oneOfType([PropTypes.number, PropTypes.string]).isRequired,
   setCell: PropTypes.func.isRequired,
   onFocus: PropTypes.func,
+  onMouseEnter: PropTypes.func,
+  onMouseLeave: PropTypes.func,
+  cellValue: PropTypes.oneOfType([PropTypes.number, PropTypes.string]).isRequired,
 };

@@ -1,6 +1,7 @@
 {
   "name": "lab11",
   "version": "0.1.0",
+  "proxy": "http://localhost:8000",
   "private": true,
   "dependencies": {
     "@testing-library/jest-dom": "^5.11.5",
@@ -26,7 +27,7 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "server":"nodemon .server/server.js localhost 8000"
+    "server": "node ./server/server.js localhost 8000  --ignore './server/table.json'"
   },
   "eslintConfig": {
     "extends": [
